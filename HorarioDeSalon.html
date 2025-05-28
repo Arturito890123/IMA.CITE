@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Horario Centro de Cómputo</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <!-- TOAST DE MENSAJES -->
+  <div id="toast"></div>
+
+  <!-- MODAL EMERGENTE -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="cerrarModal()">X</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <header>
+    <h1>IMA.CITE</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="MaterialDeApoyo.html">Material de clase</a></li>
+        <li><a href="CentroQuejas.html">Quejas y Sugerencias</a></li>     
+      </ul>
+    </nav>
+  </header>
+
+  <!-- LOGO -->
+  <div class="hero">
+    <img src="imagenes/SalonComputo1200x210.png" alt="Hero Image" />
+  </div>
+
+  <div class="quoteTHREE">
+    <h2><strong>HORARIO</strong></h2>
+  </div>
+
+  <table id="horario">
+    <thead>
+      <tr>
+        <th class="dia-header">Hora</th>
+        <th class="dia-header">Lunes</th>
+        <th class="dia-header">Martes</th>
+        <th class="dia-header">Miércoles</th>
+        <th class="dia-header">Jueves</th>
+        <th class="dia-header">Viernes</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-body"></tbody>
+  </table>
+
+<script>
+  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+  const datosPredeterminados = {
+    "8:00-8:40": { "Martes": "5°A", "Miércoles": "1°A", "Jueves": "1°B" },
+    "8:40-9:20": { "Lunes": "6°A", "Martes": "X" },
+    "9:20-10:00": { "Lunes": "3°A", "Martes": "X", "Miércoles": "2°B", "Jueves": "3°B" },
+    "10:00-10:30": { "Lunes": "R", "Martes": "R", "Miércoles": "R", "Jueves": "R", "Viernes": "R" },
+    "10:30-11:45": { "Martes": "6°B" },
+    "11:45-12:30": { "Lunes": "4°A", "Martes": "5°B", "Miércoles": "4°B", "Jueves": "2°A" }
+  };
+
+  let datosHorario = {};
+  let ocupadosPersonalizados = {};
+
+  const gruposDisponibles = Array.from(new Set(
+    Object.values(datosPredeterminados)
+      .flatMap(dia => Object.values(dia).filter(grupo => grupo && grupo !== "X" && grupo !== "R"))
+  ));
+
+  function cargarDatosHorario() {
+  const ahora = new Date();
+  const horaActual = ahora.getHours();
+  const diaActual = ahora.getDay(); // 1 = Lunes, 5 = Viernes
+  const fechaGuardado = localStorage.getItem("fechaGuardado");
+
+  const guardadoHorario = localStorage.getItem("datosHorario");
+  const guardadoOcupados = localStorage.getItem("ocupadosPersonalizados");
+
+  // Si no hay datos guardados o si es un nuevo día, restablecer lo necesario
+  if (!guardadoHorario || fechaGuardado !== ahora.toDateString()) {
+    datosHorario = JSON.parse(JSON.stringify(datosPredeterminados));
+    ocupadosPersonalizados = {};
+    localStorage.setItem("fechaGuardado", ahora.toDateString());
+    return;
+  }
+
+  datosHorario = JSON.parse(guardadoHorario);
+  ocupadosPersonalizados = guardadoOcupados ? JSON.parse(guardadoOcupados) : {};
+
+  // Limpiar solo si ya pasaron las 14:00
+  if (horaActual >= 14) {
+    const diaActual = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+    const mapaDias = {
+      "Lunes": 1,
+      "Martes": 2,
+      "Miércoles": 3,
+      "Jueves": 4,
+      "Viernes": 5
+    };
+
+    for (const hora in datosHorario) {
+      dias.forEach(nombreDia => {
+        const indiceDia = mapaDias[nombreDia];
+
+        // Si el día es anterior al actual
+        if (indiceDia < diaActual) {
+          const valorPredeterminado = datosPredeterminados[hora]?.[nombreDia];
+          if (valorPredeterminado !== undefined) {
+            datosHorario[hora][nombreDia] = valorPredeterminado;
+          } else {
+            delete datosHorario[hora][nombreDia];
+          }
+
+          delete ocupadosPersonalizados[`${hora}-${nombreDia}`];
+        }
+      });
+    }
+
+    localStorage.setItem("fechaGuardado", ahora.toDateString());
+    guardarDatosHorario();
+  }
+}
+
+  function guardarDatosHorario() {
+    localStorage.setItem("datosHorario", JSON.stringify(datosHorario));
+    localStorage.setItem("ocupadosPersonalizados", JSON.stringify(ocupadosPersonalizados));
+    localStorage.setItem("fechaGuardado", new Date().toDateString());
+  }
+
+  function generarHorario() {
+    const tbody = document.getElementById("tabla-body");
+    tbody.innerHTML = "";
+
+    Object.keys(datosHorario).forEach(hora => {
+      const fila = document.createElement("tr");
+      const celdaHora = document.createElement("td");
+      celdaHora.textContent = hora;
+      celdaHora.className = "hora";
+      fila.appendChild(celdaHora);
+
+      if (hora === "10:00-10:30") {
+        const celdaReceso = document.createElement("td");
+        celdaReceso.colSpan = 5;
+        celdaReceso.textContent = "Receso";
+        celdaReceso.className = "receso";
+        fila.appendChild(celdaReceso);
+      } else {
+        dias.forEach(dia => {
+          const celda = document.createElement("td");
+          const clase = datosHorario[hora][dia];
+
+          if (clase === "X" || clase === "R" || clase === undefined) {
+            celda.className = "bloqueado";
+          } else if (clase.startsWith("CANCELADO-")) {
+            celda.textContent = clase.replace("CANCELADO-", "");
+            celda.className = "cancelado";
+            celda.onclick = () => mostrarOpciones(hora, dia, clase);
+          } else {
+            celda.textContent = clase;
+            const clave = `${hora}-${dia}`;
+            celda.className = ocupadosPersonalizados[clave] ? "disponible" : "ocupado";
+            celda.onclick = () => mostrarOpciones(hora, dia, clase);
+          }
+
+          fila.appendChild(celda);
+        });
+      }
+
+      tbody.appendChild(fila);
+    });
+  }
+
+  function mostrarOpciones(hora, dia, clase) {
+    const esCancelado = clase && clase.startsWith("CANCELADO");
+    const grupo = clase?.replace("CANCELADO-", "");
+
+    let contenido = `<h3>Acción para ${dia} a las ${hora}</h3>
+      <button onclick="mostrarFormularioAsignacion('${hora}', '${dia}')">Agendar Clase</button>`;
+
+    if (clase && !esCancelado) {
+      contenido += `<button onclick="mostrarFormularioCancelacion('${hora}', '${dia}', '${grupo}')">Cancelar Clase</button>`;
+    }
+
+    abrirModal(contenido);
+  }
+
+  function mostrarFormularioAsignacion(hora, dia) {
+    const contenido = `
+      <h3>Asignar Clase</h3>
+      <form onsubmit="asignarClase(event, '${hora}', '${dia}')">
+        <label>Nombre del Maestro: <input name="maestro" required></label><br>
+        <label>Grupo:
+          <select name="grupo" required>
+            ${gruposDisponibles.map(grupo => `<option value="${grupo}">${grupo}</option>`).join("")}
+          </select>
+        </label><br>
+        <label>Cantidad de Alumnos: <input name="alumnos" type="number" required></label><br>
+        <label>Fecha y Hora de Inicio: <input name="inicio" type="datetime-local" required></label><br>
+        <label>Fecha y Hora de Fin: <input name="fin" type="datetime-local" required></label><br><br>
+        <button type="submit">Asignar Clase</button>
+      </form>`;
+    abrirModal(contenido);
+  }
+
+  function mostrarFormularioCancelacion(hora, dia, grupo) {
+    const contenido = `
+      <h3>Cancelar Clase</h3>
+      <form onsubmit="cancelarClase(event, '${hora}', '${dia}')">
+        <p><strong>Grupo:</strong> ${grupo}</p>
+        <p><strong>Hora:</strong> ${hora}</p>
+        <p><strong>Día:</strong> ${dia}</p>
+        <button type="submit">Confirmar Cancelación</button>
+      </form>`;
+    abrirModal(contenido);
+  }
+
+  function abrirModal(contenidoHTML) {
+    document.getElementById("modal-body").innerHTML = contenidoHTML;
+    document.getElementById("modal").style.display = "flex";
+  }
+
+  function cerrarModal() {
+    document.getElementById("modal").style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById("modal");
+    if (event.target === modal) {
+      cerrarModal();
+    }
+  };
+
+  function mostrarToast(mensaje) {
+    const toast = document.getElementById("toast");
+    toast.textContent = mensaje;
+    toast.style.display = "block";
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 2500);
+  }
+
+  function asignarClase(e, hora, dia) {
+    e.preventDefault();
+    const grupoSeleccionado = e.target.grupo.value;
+    datosHorario[hora][dia] = grupoSeleccionado;
+    const clave = `${hora}-${dia}`;
+    ocupadosPersonalizados[clave] = true;
+
+    guardarDatosHorario();
+    generarHorario();
+    cerrarModal();
+    mostrarToast("Clase asignada correctamente");
+  }
+
+  function cancelarClase(e, hora, dia) {
+    e.preventDefault();
+    datosHorario[hora][dia] = `CANCELADO-${datosHorario[hora][dia]}`;
+    const clave = `${hora}-${dia}`;
+    delete ocupadosPersonalizados[clave];
+
+    guardarDatosHorario();
+    generarHorario();
+    cerrarModal();
+    mostrarToast("Clase cancelada correctamente");
+  }
+
+  cargarDatosHorario();
+  generarHorario();
+</script>
+
+<!--PIE DE PAG-->
+    <div class="new-section">
+        <div class="columns">
+            <div class="column">
+                <h3> Informes...</h3>
+                <p>Puedes solicitar informes de __  a __ hora(s), estamos para atender!</p>
+            </div>
+            <div class="column">
+                <h3>Contacto</h3>
+                <p>Direccion de correo</p>
+                <p>Numero telefonico</p>
+            </div>
+            <div class="column">
+                <h3>LEMA INSTITUCIONAL</h3>
+                <div class="quote">
+                    <p>El lema de Ignacio Manuel Altamirano,</p>
+                    <p><strong>"La envidia es proteiforme".</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; IMA.CITE 2025</p>
+    </footer>
+</body>
+</html>

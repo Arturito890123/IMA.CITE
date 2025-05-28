@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMA.CITE</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+
+<!--CUERPO-->
+<body>
+
+    <!-- ENCABEZADO -->
+    <header>
+        <h1>IMA.CITE</h1>
+            <nav id="nav">
+                <ul>
+                    <li><button id="btnAbrirLogin">Iniciar Sesión</button></li>
+                    <li><a href="HorarioDeSalon.html">Salón de cómputo</a></li>
+                    <li><a href="MaterialDeApoyo.html">Material de clase</a></li>
+                    <li><a href="CentroQuejas.html">Quejas y Sugerencias</a></li>
+                </ul>
+            </nav>
+    </header>
+
+    <!-- LOGO -->
+    <div class="hero">
+        <img src="imagenes/logo.jpg" alt="Hero Image">
+        <h2></h2>
+    </div>
+
+    <!-- REDIRECCIONADORES -->
+    <div class="content">
+        <div class="card-container">
+            <div class="card">
+                <h3><strong>Horario</strong></h3>
+                <p>Agenda y revisa cuando son tus siguientes clases en la sala de cómputo de nuestra institucion!</p>
+                <img src="imagenes/InicioSalonComputo270x270.png" alt="City Image 1">
+                <a href="HorarioDeSalon.html"><button><strong>MORE</strong></button></a>
+            </div>
+            <div class="card">
+                <h3><strong>Material de Clase</strong></h3>
+                <p>Visita los videos que preparamos para tus clases!</p>
+                <img src="imagenes/InicioMaterialClase270x270.png" alt="City Image 2">
+                <a href="MaterialDeApoyo.html"><button><strong>MORE</strong></button></a>
+            </div>
+            <div class="card">
+                <h3><strong>Quejas y Sugerencias</strong></h3>
+                <p>¿Haz detectado algun instrumento en mal estado?, ayudanos a mejorar nuestras instalaciones para ti.</p>
+                <img src="imagenes/InicioCentroQuejas270x270.png" alt="City Image 3">
+                <a href="CentroQuejas.html"><button><strong>MORE</strong></button></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIE DE PAGINA -->
+    <div class="new-section">
+        <div class="columns">
+            <div class="columntwo">
+                <h2>Conocenos</h2>
+                <div class="quotetwo">
+                    <p>Y, viéndole don Quijote de aquella manera, con muestras de tanta tristeza,
+                         le dijo: Sábete, Sancho, que no es un hombre más que otro si no hace más que otro. 
+                         Todas estas borrascas que nos suceden son señales de que presto ha de serenar el tiempo y
+                          han de sucedernos bien las cosas; porque no es posible que el mal ni el bien sean durables, 
+                          y de aquí se sigue que, habiendo durado mucho el mal, el bien está ya cerca. Así que,
+                           no debes congojarte por las desgracias que a mí me suceden, pues a ti no te cabe parte dellas.
+                           Y, viéndole don Quijote de aquella manera, con muestras de tanta tristeza, le dijo: Sábete,
+                            Sancho, que no es un hombre más que otro si no hace más que otro. Todas estas borrascas
+                             que nos suceden son señales de que presto ha de serenar el tiempo y han de sucedernos 
+                             bien las cosas; porque no es posible que el mal ni el bien sean durables, y de aquí se sigue que, 
+                             habiendo durado mucho el mal, el bien está ya cerca.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container">
+
+            <h2>¿Dónde nos encontramos?</h2>
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15049.989269290994!2d-99.2030494!3d19.6761379!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d21fcf910570a7%3A0xb7d6063cb6fbcf63!2sPrimaria%20Ignacio%20Manuel%20Altamirano%20Y%20Jose%20Vasconcelos!5e0!3m2!1ses-419!2smx!4v1715622654321!5m2!1ses-419!2smx" 
+                    width="100%" 
+                    height="450" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+
+                <div class="column">
+                    <h3> Informes...</h3>
+                    <p>Puedes solicitar informes de __  a __ hora(s), estamos para atender!</p>
+                </div>
+                <div class="column">
+                    <h3>Contacto</h3>
+                    <p>Direccion de correo</p>
+                    <p>Numero telefonico</p>
+                </div>
+                <div class="column">
+                    <h3>LEMA INSTITUCIONAL</h3>
+                    <div class="quote">
+                        <p>El lema de Ignacio Manuel Altamirano,</p>
+                        <p><strong>"La envidia es proteiforme".</strong></p>
+                    </div>
+                </div>
+        </div>
+    </div>
+    <!-- COPYRIGHT -->
+    <footer>
+        <p>&copy; IMA.CITE 2025</p>
+    </footer>
+
+
+<!-- Apartado chamba -->    
+
+  <!-- Modal Login -->
+  <div id="modalLogin" class="modal">
+    <div class="modal-contenido">
+      <span id="cerrarLogin" class="cerrar">&times;</span>
+      <h2>Iniciar Sesión</h2>
+      <form id="formLogin" onsubmit="iniciarSesion(event)">
+        <input type="email" id="correo" placeholder="Correo institucional" required />
+        <input type="password" id="contrasena" placeholder="Contraseña" required />
+        <button type="submit">Ingresar</button>
+      </form>
+      <button id="btnAbrirRegistro">Registrarse</button>
+      <button id="btnAbrirRecuperar">Olvidé mi contraseña</button>
+      <p id="mensajeLogin"></p>
+    </div>
+  </div>
+
+<!-- Modal Registro -->
+<div id="modalRegistro" class="modal">
+  <div class="modal-contenido">
+    <span id="cerrarRegistro" class="cerrar">&times;</span>
+    <h2>Registro</h2>
+    <form id="formRegistro" onsubmit="registrarse(event)">
+      <input type="text" id="registroNombre" placeholder="Nombre completo" required>
+      <input type="email" id="registroCorreo" placeholder="Correo institucional" required>
+      <input type="password" id="registroContrasena" placeholder="Contraseña" required>
+      <input type="password" id="registroConfirmarContrasena" placeholder="Confirmar contraseña" required>
+      <select id="registroRol" required>
+        <option value="">Selecciona un rol</option>
+        <option value="Administrador">Administrador</option>
+        <option value="Docente">Docente</option>
+        <option value="Estudiante">Estudiante</option>
+      </select>
+      <button type="submit">Registrar</button>
+    </form>
+    <p id="mensajeRegistro"></p>
+  </div>
+</div>
+
+
+
+<!-- Modal Recuperar Contraseña -->
+<div id="modalRecuperar" class="modal">
+  <div class="modal-contenido">
+    <span id="cerrarRecuperar" class="cerrar">&times;</span>
+    <h2>Recuperar Contraseña</h2>
+    <form id="formRecuperar" onsubmit="recuperarContrasena(event)">
+      <input type="email" id="recuperarCorreo" placeholder="Correo institucional" required>
+      <button type="submit">Enviar enlace de recuperación</button>
+    </form>
+    <p id="mensajeRecuperar"></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Variables modales Login
+  const modalLogin = document.getElementById('modalLogin');
+  const btnAbrirLogin = document.getElementById('btnAbrirLogin');
+  const cerrarLogin = document.getElementById('cerrarLogin');
+  const mensajeLogin = document.getElementById('mensajeLogin');
+
+  // Variables modal Registro
+  const modalRegistro = document.getElementById('modalRegistro');
+  const btnAbrirRegistro = document.getElementById('btnAbrirRegistro');
+  const cerrarRegistro = document.getElementById('cerrarRegistro');
+  const mensajeRegistro = document.getElementById('mensajeRegistro');
+
+  // Variables modal Recuperar
+  const modalRecuperar = document.getElementById('modalRecuperar');
+  const btnAbrirRecuperar = document.getElementById('btnAbrirRecuperar');
+  const cerrarRecuperar = document.getElementById('cerrarRecuperar');
+  const mensajeRecuperar = document.getElementById('mensajeRecuperar');
+
+  // Abrir modal Login
+  btnAbrirLogin.addEventListener('click', () => {
+    modalLogin.style.display = 'block';
+    mensajeLogin.textContent = '';
+  });
+
+  // Abrir modal Registro desde Login
+  btnAbrirRegistro.addEventListener('click', () => {
+    modalLogin.style.display = 'none';
+    modalRegistro.style.display = 'block';
+    mensajeRegistro.textContent = '';
+  });
+
+  // Abrir modal Recuperar desde Login
+  btnAbrirRecuperar.addEventListener('click', () => {
+    modalLogin.style.display = 'none';
+    modalRecuperar.style.display = 'block';
+    mensajeRecuperar.textContent = '';
+  });
+
+  // Cerrar modales
+  cerrarLogin.addEventListener('click', () => modalLogin.style.display = 'none');
+  cerrarRegistro.addEventListener('click', () => modalRegistro.style.display = 'none');
+  cerrarRecuperar.addEventListener('click', () => modalRecuperar.style.display = 'none');
+
+  // Cerrar modales haciendo clic fuera
+  window.addEventListener('click', (e) => {
+    if (e.target === modalLogin) modalLogin.style.display = 'none';
+    if (e.target === modalRegistro) modalRegistro.style.display = 'none';
+    if (e.target === modalRecuperar) modalRecuperar.style.display = 'none';
+  });
+
+  // Función para login
+  async function iniciarSesion(e) {
+    e.preventDefault();
+
+    const correo = document.getElementById('correo').value.trim();
+    const contrasena = document.getElementById('contrasena').value;
+
+    if (!correo || !contrasena) {
+      mensajeLogin.style.color = 'red';
+      mensajeLogin.textContent = "Completa todos los campos.";
+      return;
+    }
+
+    try {
+      const respuesta = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo, contraseña: contrasena })
+      });
+
+      const datos = await respuesta.json();
+
+      if (respuesta.ok) {
+        mensajeLogin.style.color = 'green';
+        mensajeLogin.textContent = `Bienvenido, ${datos.nombre} (${datos.rol})`;
+
+        setTimeout(() => {
+          modalLogin.style.display = 'none';
+          // location.href = '/dashboard.html'; // Redirigir si lo deseas
+        }, 1500);
+
+      } else {
+        mensajeLogin.style.color = 'red';
+        mensajeLogin.textContent = datos.mensaje || 'Error en el login';
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      mensajeLogin.style.color = 'red';
+      mensajeLogin.textContent = "Error al conectar con el servidor.";
+    }
+  }
+
+  // Listener para el formulario login
+  const formLogin = document.getElementById('formLogin');
+  formLogin.addEventListener('submit', iniciarSesion);
+
+  // Función para registro
+  async function registrarse(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById('registroNombre').value.trim();
+    const correo = document.getElementById('registroCorreo').value.trim();
+    const contrasena = document.getElementById('registroContrasena').value;
+    const confirmar = document.getElementById('registroConfirmarContrasena').value;
+    const rol = document.getElementById('registroRol').value;
+
+    if (!nombre || !correo || !contrasena || !confirmar || !rol) {
+      mensajeRegistro.style.color = "red";
+      mensajeRegistro.textContent = "Completa todos los campos.";
+      return;
+    }
+
+    if (contrasena !== confirmar) {
+      mensajeRegistro.style.color = "red";
+      mensajeRegistro.textContent = "Las contraseñas no coinciden.";
+      return;
+    }
+
+    try {
+      const respuesta = await fetch('http://localhost:3000/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, correo, contrasena, rol })
+      });
+
+      const datos = await respuesta.json();
+
+      if (respuesta.ok) {
+        mensajeRegistro.style.color = "green";
+        mensajeRegistro.textContent = datos.mensaje || "Registro exitoso.";
+        document.getElementById('formRegistro').reset();
+
+        setTimeout(() => {
+          modalRegistro.style.display = 'none';
+          modalLogin.style.display = 'block';
+        }, 1500);
+      } else {
+        mensajeRegistro.style.color = "red";
+        mensajeRegistro.textContent = datos.mensaje || "Error al registrar.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      mensajeRegistro.style.color = "red";
+      mensajeRegistro.textContent = "Error al conectar con el servidor.";
+    }
+  }
+
+  // Listener para el formulario de registro
+  const formRegistro = document.getElementById('formRegistro');
+  formRegistro.addEventListener('submit', registrarse);
+});
+</script>
+
+</body>
+</html>
+

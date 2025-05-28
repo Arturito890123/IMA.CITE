@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMA.CITE</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<!--CUERPO-->
+<body>
+    <header>
+        <h1>IMA.CITE</h1>
+            <nav id="nav">
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="HorarioDeSalon.html">Salón de cómputo</a></li>
+                    <li><a href="MaterialDeApoyo.html">Material de apoyo</a></li>
+                </ul>
+            </nav>
+    </header>
+
+    <!-- LOGO -->
+    <div class="hero">
+        <img src="imagenes/CentroQuejas1200x210.png" alt="Hero Image"> <!--IMAGENES DE 1200 X 200-->
+    </div>
+    
+<div class="container">
+    <h1>QUEJAS Y SUGERENCIAS</h1>
+    
+    <button id="cerrar-sesion-btn" style="display:none;">Cerrar sesión</button>
+    <button id="iniciar-sesion-btn" style="display:none;">Iniciar sesión</button>
+    <form class="foro-form" id="foroForm">
+      <label for="nombre">Tu nombre (opcional):</label>
+      <input type="text" id="nombre" name="nombre" placeholder="Nombre...">
+      <label for="mensaje">Tu queja:</label>
+      <textarea id="mensaje" name="mensaje" required placeholder="Escribe aquí tu queja o sugerencia..."></textarea>
+      <label for="foto">Subir foto (opcional):</label>
+      <input type="file" id="foto" name="foto" accept="image/*">
+      <button type="submit">Publicar</button>
+    </form>
+    <div id="foroEntries"></div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="cerrarImagen()">
+    <img id="imagenAmpliada" src="" alt="Imagen ampliada">
+  </div>
+
+  <!-- Modal Login (neumorphic) -->
+  <div id="login-modal-bg">
+    <div id="login-card">
+      <button type="button" id="close-login" title="Cerrar">&times;</button>
+      <h1>Login</h1>
+      <form id="login-form" autocomplete="off">
+        <input type="text" class="neumorphic-input" name="username" placeholder="Usuario" required>
+        <input type="password" class="neumorphic-input" name="password" placeholder="Contraseña" required>
+        <button type="submit" class="neumorphic-button">Iniciar Sesión</button>
+        <div id="login-error">Usuario o contraseña incorrectos.</div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Credenciales de administrador
+    const USUARIO = "admin";
+    const CONTRASENA = "1234";
+
+    const foroForm = document.getElementById('foroForm');
+    const foroEntries = document.getElementById('foroEntries');
+    const overlay = document.getElementById('overlay');
+    const imagenAmpliada = document.getElementById('imagenAmpliada');
+    const cerrarSesionBtn = document.getElementById('cerrar-sesion-btn');
+    const iniciarSesionBtn = document.getElementById('iniciar-sesion-btn');
+    let entries = JSON.parse(localStorage.getItem("foroData")) || [];
+
+    // Estado para saber qué entrada se está respondiendo o editando
+    let idxRespondiendo = null;
+    let idxEditandoRespuesta = null;
+
+    // Estado de sesión: leer de sessionStorage
+    let loggedIn = sessionStorage.getItem("adminLogged") === "true";
+
+    // Si la página fue recargada, cerrar sesión:
+    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+      sessionStorage.removeItem("adminLogged");
+      loggedIn = false;
+    }
+
+    function guardarLocal() {
+      localStorage.setItem("foroData", JSON.stringify(entries));
+    }
+
+    function formatearFechaHora(ms) {
+      if (!ms) return "";
+      const fecha = new Date(ms);
+      return fecha.toLocaleString("es-MX", {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function renderEntries() {
+      foroEntries.innerHTML = "";
+      entries.forEach((entry, idx) => {
+        let fotoHTML = entry.foto ? `<img src="${entry.foto}" alt="Foto subida" onclick="ampliarImagen('${entry.foto}')">` : "";
+        let publicacionHora = `<span class="hora-publicacion">Publicado: ${formatearFechaHora(entry.timestamp)}</span>`;
+        let respuestaHTML = "";
+        let borrarBtn = loggedIn
+          ? `<button class="borrar-btn" onclick="borrarEntrada(${idx})" title="Borrar queja">Borrar</button>`
+          : "";
+
+        // Mostrar respuesta o formulario de edición de respuesta
+        if (entry.respuesta) {
+          if (loggedIn && idxEditandoRespuesta === idx) {
+            // Formulario de edición de respuesta
+            respuestaHTML = `
+              <form class="edit-respuesta-form" onsubmit="return editarRespuestaGuardar(${idx}, this)">
+                <textarea required>${entry.respuesta}</textarea>
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="cancelarEditarRespuesta()">Cancelar</button>
+              </form>
+              <span class="hora-respuesta">Respondido: ${formatearFechaHora(entry.respuestaHora)}</span>
+            `;
+          } else {
+            respuestaHTML = `
+              <div class="respuesta">
+                <b>Administrativos:</b> ${entry.respuesta}
+                <span class="hora-respuesta">Respondido: ${formatearFechaHora(entry.respuestaHora)}</span>
+                ${loggedIn ? `<button class="editar-btn" onclick="editarRespuesta(${idx})">Editar</button>` : ""}
+              </div>
+            `;
+          }
+        } else {
+          respuestaHTML = loggedIn
+            ? `<form class="respuesta-form" onsubmit="return responder(${idx}, this)">
+                  <textarea placeholder="Responder como administrador..." required></textarea>
+                  <button type="submit">Responder</button>
+               </form>`
+            : `<button class="neumorphic-button" onclick="pedirLogin(${idx})" style="margin-top:10px;">Responder</button>`;
+        }
+
+        foroEntries.innerHTML += `
+          <div class="foro-entry">
+            ${borrarBtn}
+            <b>${entry.nombre ? entry.nombre : "Anónimo"}:</b><br>
+            ${publicacionHora}
+            ${entry.mensaje}<br>
+            ${fotoHTML}
+            ${respuestaHTML}
+          </div>
+        `;
+      });
+
+      // Mostrar/ocultar botón cerrar sesión e iniciar sesión
+      cerrarSesionBtn.style.display = loggedIn ? 'block' : 'none';
+      iniciarSesionBtn.style.display = !loggedIn ? 'block' : 'none';
+    }
+
+        foroForm.onsubmit = function(e) {
+      e.preventDefault();
+      const nombre = foroForm.nombre.value;
+      const mensaje = foroForm.mensaje.value;
+      const file = foroForm.foto.files[0];
+
+      const nuevoEntry = { nombre, mensaje, foto: null, respuesta: null, timestamp: Date.now(), respuestaHora: null };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          nuevoEntry.foto = evt.target.result;
+          entries.push(nuevoEntry);
+          guardarLocal();
+          renderEntries();
+          foroForm.reset();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        entries.push(nuevoEntry);
+        guardarLocal();
+        renderEntries();
+        foroForm.reset();
+      }
+    };
+
+    window.responder = function(idx, form) {
+      const respuesta = form.querySelector('textarea').value;
+      entries[idx].respuesta = respuesta;
+      entries[idx].respuestaHora = Date.now();
+      guardarLocal();
+      renderEntries();
+      return false;
+    };
+
+    window.borrarEntrada = function(idx) {
+      if (loggedIn && confirm("¿Estás seguro de borrar esta queja?")) {
+        entries.splice(idx, 1);
+        guardarLocal();
+        renderEntries();
+      }
+    };
+
+    window.ampliarImagen = function(src) {
+      imagenAmpliada.src = src;
+      overlay.style.display = 'flex';
+    }
+
+    window.cerrarImagen = function() {
+      overlay.style.display = 'none';
+    }
+
+    // LOGIN MODAL
+    function pedirLogin(idx) {
+      idxRespondiendo = idx;
+      document.getElementById('login-modal-bg').style.display = 'flex';
+      document.getElementById('login-form').reset();
+      document.getElementById('login-error').style.display = 'none';
+      document.querySelector('#login-form input[name="username"]').focus();
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+      if (username === USUARIO && password === CONTRASENA) {
+        loggedIn = true;
+        sessionStorage.setItem("adminLogged", "true");
+        document.getElementById('login-modal-bg').style.display = 'none';
+        renderEntries();
+        setTimeout(() => {
+          const form = foroEntries.querySelectorAll('.respuesta-form')[idxRespondiendo];
+          if (form) {
+            form.querySelector('textarea').focus();
+          }
+        }, 50);
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    });
+
+    document.getElementById('close-login').onclick = function() {
+      document.getElementById('login-modal-bg').style.display = 'none';
+    };
+
+    // Cerrar sesión
+    cerrarSesionBtn.onclick = function() {
+      loggedIn = false;
+      sessionStorage.removeItem("adminLogged");
+      idxEditandoRespuesta = null;
+      renderEntries();
+    };
+
+    // Botón iniciar sesión
+    iniciarSesionBtn.onclick = function() {
+      pedirLogin(null);
+    };
+
+    // Editar respuesta
+    window.editarRespuesta = function(idx) {
+      idxEditandoRespuesta = idx;
+      renderEntries();
+      setTimeout(() => {
+        // Enfocar textarea del edit
+        const form = foroEntries.querySelectorAll('.edit-respuesta-form')[0];
+        if (form) form.querySelector('textarea').focus();
+      }, 50);
+    };
+
+    // Guardar edición de respuesta
+    window.editarRespuestaGuardar = function(idx, form) {
+      const nuevaRespuesta = form.querySelector('textarea').value;
+      entries[idx].respuesta = nuevaRespuesta;
+      entries[idx].respuestaHora = Date.now(); // Actualiza hora de respuesta
+      guardarLocal();
+      idxEditandoRespuesta = null;
+      renderEntries();
+      return false;
+    };
+
+    // Cancelar edición de respuesta
+    window.cancelarEditarRespuesta = function() {
+      idxEditandoRespuesta = null;
+      renderEntries();
+    };
+
+    renderEntries();
+  </script>
+
+<!--PIE DE PAG-->
+    <div class="new-section">
+        <div class="columns">
+            <div class="column">
+                <h3> Informes...</h3>
+                <p>Puedes solicitar informes de __  a __ hora(s), estamos para atender!</p>
+            </div>
+            <div class="column">
+                <h3>Contacto</h3>
+                <p>Direccion de correo</p>
+                <p>Numero telefonico</p>
+            </div>
+            <div class="column">
+                <h3>LEMA INSTITUCIONAL</h3>
+                <div class="quote">
+                    <p>El lema de Ignacio Manuel Altamirano,</p>
+                    <p><strong>"La envidia es proteiforme".</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; IMA.CITE 2025</p>
+    </footer>
+</body>
+</html>
